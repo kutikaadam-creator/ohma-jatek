@@ -1,0 +1,713 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Varázserdő Kalandjai</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+SC:wght@700;800&family=Alegreya+Sans:wght@400;500;700&family=Alegreya:ital@0;1&display=swap">
+<style>
+/* Layout: mesekönyv-lap képernyők; a játéktábla kígyózó ösvény 6 oszlopban, alatta játékoskártyák */
+:root{
+  --bg:#eef0e2; --paper:#f8f6ec; --ink:#23301f; --muted:#5d6a55;
+  --moss:#3f6b35; --moss-ink:#ffffff; --gold:#b98512; --magic:#3a6fb5; --line:#d3d6c1; --taken:#e2e4d4;
+  --r1:#e9dfc4; --r2:#f2d3d0; --r3:#ddd8cc; --r4:#d3e5ec; --r5:#e3dcc9; --r6:#efe0b8; --r7:#dce8cf; --r8:#d6d2e4;
+  --display:"Alegreya SC",Georgia,serif; --body:"Alegreya Sans",system-ui,sans-serif; --tale:"Alegreya",Georgia,serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141a13; --paper:#1d251b; --ink:#e6e9d8; --muted:#a3ad97;
+  --moss:#79a865; --moss-ink:#10170e; --gold:#e3b94a; --magic:#86b3f0; --line:#334030; --taken:#262f24;
+  --r1:#3a3424; --r2:#3e2b2a; --r3:#34322c; --r4:#243840; --r5:#36321f; --r6:#3e351c; --r7:#293821; --r8:#2e2b3d; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141a13; --paper:#1d251b; --ink:#e6e9d8; --muted:#a3ad97;
+  --moss:#79a865; --moss-ink:#10170e; --gold:#e3b94a; --magic:#86b3f0; --line:#334030; --taken:#262f24;
+  --r1:#3a3424; --r2:#3e2b2a; --r3:#34322c; --r4:#243840; --r5:#36321f; --r6:#3e351c; --r7:#293821; --r8:#2e2b3d; color-scheme:dark}
+html,body{background:var(--bg);color:var(--ink)}
+body{font-family:var(--body);font-size:17px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 40px}
+.wrap{max-width:960px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+header{display:flex;align-items:center;gap:clamp(10px,3vw,24px);padding-right:clamp(0px,18vw,190px)}
+.logo{width:clamp(120px,26vw,240px);height:auto;flex:none;filter:drop-shadow(0 3px 6px color-mix(in srgb,var(--ink) 25%,transparent))}
+.htxt{display:flex;flex-direction:column;gap:2px;min-width:0}
+@media (max-width:520px){header{flex-direction:column;align-items:flex-start;padding-right:0}.logo{width:150px}}
+h1{font-family:var(--display);font-size:clamp(28px,6vw,46px);margin:0;letter-spacing:.02em;color:var(--moss);text-wrap:balance}
+.sub{font-family:var(--tale);font-style:italic;color:var(--muted);margin:0}
+h2{font-family:var(--display);font-size:clamp(22px,4.5vw,30px);margin:0;text-align:center;text-wrap:balance}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:24px max(14px,3vw);display:flex;flex-direction:column;gap:18px;align-items:center}
+.counts{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+.count{width:64px;height:64px;border-radius:50%;border:2px solid var(--moss);background:transparent;color:var(--moss);font-family:var(--display);font-size:28px;cursor:pointer}
+.count:hover,.count:focus-visible{background:var(--moss);color:var(--moss-ink);outline:none}
+.names{display:flex;flex-direction:column;gap:12px;width:100%;max-width:420px}
+.names label{display:flex;flex-direction:column;gap:4px;font-size:14px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.names input{font:inherit;font-size:18px;text-transform:none;letter-spacing:0;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+.names input:focus-visible{outline:2px solid var(--moss);outline-offset:1px}
+.btn{font-family:var(--display);font-size:20px;padding:10px 26px;border-radius:999px;border:none;background:var(--moss);color:var(--moss-ink);cursor:pointer}
+.btn.ghost{background:transparent;color:var(--moss);border:2px solid var(--moss)}
+.btn:disabled{opacity:.45;cursor:default}
+.btn:focus-visible,.card:focus-visible,.choice:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.turn{font-family:var(--tale);font-style:italic;font-size:20px;text-align:center;margin:0}
+.turn b{font-family:var(--display);font-style:normal;color:var(--moss)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px;width:100%}
+.card{position:relative;display:flex;flex-direction:column;background:var(--paper);border:1px solid var(--line);border-radius:12px;overflow:hidden;cursor:pointer;text-align:left;font:inherit;color:inherit;padding:0;transition:transform .15s}
+.card:hover:not(:disabled){transform:translateY(-3px)}
+.card img{width:100%;aspect-ratio:1;object-fit:cover;display:block;background:var(--taken)}
+.card .t{padding:8px 10px 10px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.card .n{font-family:var(--display);font-size:18px;line-height:1.15}
+.card .d{font-size:13.5px;color:var(--muted);line-height:1.35}
+.card:disabled{cursor:default;background:var(--taken)}
+.card:disabled img{filter:grayscale(.85) brightness(.8)}
+.owner{position:absolute;top:8px;left:8px;right:8px;background:var(--moss);color:var(--moss-ink);font-weight:700;font-size:14px;padding:3px 10px;border-radius:999px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.deal .card{animation:deal .5s backwards}
+@keyframes deal{from{opacity:.2;transform:translateY(18px) rotate(-4deg)}}
+.note{font-family:var(--tale);font-style:italic;color:var(--muted);text-align:center;margin:0;max-width:60ch}
+
+/* Tábla */
+.board{position:relative;width:100%;max-width:820px;aspect-ratio:2272/1888;background:#1d2418 url(kepek/tabla.jpg) center/100% 100% no-repeat;border-radius:14px;box-shadow:0 6px 24px color-mix(in srgb,var(--ink) 25%,transparent)}
+.board .tile{position:absolute;aspect-ratio:auto;border:none;background:transparent!important;padding:0;border-radius:9%;overflow:visible}
+.board .tile::before{content:"";position:absolute;inset:0;border-radius:inherit;background:rgba(12,16,10,.68);opacity:1;transition:opacity .5s;pointer-events:none}
+.board .tile.occ::before{opacity:0}
+.board .tile.here{box-shadow:0 0 0 3px var(--gold),0 0 18px 4px color-mix(in srgb,var(--gold) 60%,transparent)}
+.board .tile .num,.board .tile .lab{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.tile{position:relative;aspect-ratio:1;border-radius:10px;border:1px solid var(--line);padding:4px;display:flex;flex-direction:column;justify-content:space-between;min-width:0;overflow:hidden}
+.tile .num{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;line-height:1}
+.tile .lab{font-family:var(--display);font-size:clamp(9px,1.9vw,13px);line-height:1.05;overflow-wrap:anywhere}
+.tile.goal{border:2px solid var(--gold)}
+.tile.start{border:2px solid var(--moss)}
+.toks{position:absolute;inset:auto 4% 4% auto;display:flex;flex-wrap:wrap-reverse;justify-content:flex-end;gap:1px;max-width:90%}
+.tok{width:clamp(22px,5.4vw,44px);height:clamp(22px,5.4vw,44px);border-radius:50%;object-fit:cover;border:2px solid #fff8e6;box-shadow:0 2px 6px rgba(0,0,0,.55)}
+.tok.cur{box-shadow:0 0 0 2px var(--gold);animation:bob 1s ease-in-out infinite alternate}
+@keyframes bob{to{transform:translateY(-3px)}}
+.hud{display:flex;flex-direction:column;align-items:center;gap:10px}
+.boardwrap{width:100%;max-width:820px;background:#1d2418;border-radius:16px;padding:8px;display:flex;flex-direction:column;gap:4px;box-shadow:0 8px 28px color-mix(in srgb,var(--ink) 28%,transparent)}
+.boardwrap .board{box-shadow:none}
+.tray{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;padding:2px 8px 6px}
+.tray .turn{color:#e9e4cc;font-size:clamp(15px,2.4vw,20px);text-align:left;min-width:0}
+.tray .turn b{color:#e3b94a}
+.tray .sig{justify-self:end;width:100%;max-width:230px;height:auto;opacity:.92}
+.tray .dice-shadow{background:radial-gradient(closest-side,rgba(0,0,0,.7),transparent)}
+@media (max-width:520px){.tray{grid-template-columns:1fr auto}.tray .turn{grid-column:1/-1;text-align:center}.tray .dice-stage{justify-self:start}}
+.dice-stage{position:relative;width:120px;height:110px;display:flex;align-items:flex-end;justify-content:center;cursor:pointer;perspective:520px;-webkit-tap-highlight-color:transparent}
+.dice-stage:focus-visible{outline:3px solid var(--gold);outline-offset:4px;border-radius:12px}
+.dice-shadow{position:absolute;bottom:4px;left:50%;width:70px;height:14px;margin-left:-35px;border-radius:50%;background:radial-gradient(closest-side,color-mix(in srgb,var(--ink) 38%,transparent),transparent);pointer-events:none}
+.dice-drop{position:relative;width:64px;height:64px;margin-bottom:12px;transform-style:preserve-3d}
+.dice-tilt{width:100%;height:100%;transform-style:preserve-3d;transform:rotateX(-34deg) rotateY(28deg)}
+.dice-stage:hover .dice-tilt{transform:rotateX(-38deg) rotateY(34deg)}
+.cube{position:relative;width:100%;height:100%;transform-style:preserve-3d}
+.face{position:absolute;inset:0;border-radius:12px;display:grid;grid-template:repeat(3,1fr)/repeat(3,1fr);padding:9px;gap:1px;backface-visibility:hidden;
+  background:radial-gradient(circle at 30% 25%,#fffdf5,#f1e9cf 70%,#e2d6b1);box-shadow:inset 0 0 0 1px rgba(80,60,20,.25),inset -4px -5px 10px rgba(120,90,30,.22)}
+.face i{border-radius:50%;margin:2px;visibility:hidden;background:radial-gradient(circle at 40% 35%,#4e6b44,#1d2b19 75%)}
+.face i.on{visibility:visible}
+.face.f1 i.on{background:radial-gradient(circle at 40% 35%,#d34a3c,#7a1f16 75%);margin:0}
+.f1{transform:translateZ(32px)}.f6{transform:rotateY(180deg) translateZ(32px)}
+.f3{transform:rotateY(90deg) translateZ(32px)}.f4{transform:rotateY(-90deg) translateZ(32px)}
+.f2{transform:rotateX(90deg) translateZ(32px)}.f5{transform:rotateX(-90deg) translateZ(32px)}
+.cube::before{content:"";position:absolute;inset:4px;background:#e6dcbc;transform:translateZ(0)}
+@keyframes roll{0%{transform:rotate(0) scale(.8)}60%{transform:rotate(320deg) scale(1.1)}100%{transform:rotate(360deg) scale(1)}}
+.players{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;width:100%}
+.player{display:flex;gap:12px;align-items:center;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px;min-width:0}
+.player.cur{border:2px solid var(--gold)}
+.player img{width:56px;height:56px;border-radius:50%;object-fit:cover;border:3px solid var(--moss);flex:none}
+.player .t{display:flex;flex-direction:column;gap:1px;min-width:0}
+.player .pn{font-family:var(--display);font-size:19px;line-height:1.1;overflow-wrap:anywhere}
+.player .pc{color:var(--muted);font-size:14px}
+.stats{display:flex;gap:12px;flex-wrap:wrap;font-variant-numeric:tabular-nums;font-weight:700}
+.gold{display:inline-flex;align-items:center;gap:5px;color:var(--gold)}
+.magic{display:inline-flex;align-items:center;gap:5px;color:var(--magic)}
+.coin{width:16px;height:16px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fff3b8,var(--gold) 60%);box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--gold) 70%,#000)}
+.spark{width:14px;height:14px;background:var(--magic);clip-path:polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%)}
+/* Meserészlet ablak */
+.veil{position:fixed;inset:0;background:color-mix(in srgb,var(--ink) 45%,transparent);display:flex;align-items:center;justify-content:center;z-index:20;
+  padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.story{background:var(--paper);color:var(--ink);border-radius:16px;border:1px solid var(--line);max-width:560px;width:100%;max-height:100%;overflow:auto;padding:22px;display:flex;flex-direction:column;gap:14px;animation:open .3s ease-out}
+@keyframes open{from{opacity:0;transform:translateY(14px)}}
+.story .place{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0}
+.story h3{font-family:var(--display);font-size:24px;margin:0;line-height:1.15}
+.story p.txt{font-family:var(--tale);font-size:18px;line-height:1.55;margin:0}
+.choices{display:flex;flex-direction:column;gap:10px}
+.choice{text-align:left;font:inherit;color:inherit;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px 14px;cursor:pointer;display:flex;flex-direction:column;gap:4px}
+.choice:hover{border-color:var(--moss)}
+.choice .ct{font-weight:700}
+.cr{font-size:15px;color:var(--muted);margin:0}
+.result{font-family:var(--tale);font-style:italic;font-size:18px;margin:0}
+.gain{display:flex;gap:16px;justify-content:center;font-size:20px}
+.log{font-family:var(--tale);font-style:italic;color:var(--muted);margin:0;text-align:center;min-height:1.5em}
+.podium{display:flex;flex-direction:column;gap:10px;width:100%;max-width:480px}
+.sound{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));right:calc(10px + env(safe-area-inset-right,0px));z-index:30;display:flex;gap:6px}
+.sound button{font:inherit;font-size:14px;font-weight:700;display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--paper);color:var(--muted);cursor:pointer}
+.sound button[aria-pressed="true"]{color:var(--moss);border-color:var(--moss)}
+.sound button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.sound svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+@media (max-width:520px){.sound .lbl{display:none}}
+.hint{display:flex;flex-direction:column;gap:8px;align-items:flex-start;border-top:1px dashed var(--line);padding-top:12px}
+.hintbtn{display:inline-flex;align-items:center;gap:8px;font-size:17px;color:var(--magic);border-color:var(--magic)}
+.hintbtn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.hintlbl{display:flex;gap:8px;align-items:flex-start;margin:0;font-size:15px;color:var(--muted)}
+.hintlbl svg{width:18px;height:18px;flex:none;margin-top:2px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.hintpay{display:flex;gap:10px;flex-wrap:wrap}
+.hintbtn.gold{color:var(--gold);border-color:var(--gold)}
+.hinttxt{font-family:var(--tale);font-style:italic;font-size:16px;line-height:1.5;color:var(--muted);margin:0;border-left:3px solid var(--magic);padding-left:10px}
+@media (prefers-reduced-motion:reduce){.deal .card,.story,.tok.cur{animation:none}.card{transition:none}}
+</style>
+
+<div class="wrap">
+  <header>
+    <img class="logo" src="kepek/ohma-logo.png" alt="Ohma">
+    <div class="htxt"><h1>A Varázserdő Kalandjai</h1>
+    <p class="sub">társasjáték Ohma meséje nyomán</p></div>
+  </header>
+  <main id="app"></main>
+</div>
+<div id="modal"></div>
+<div class="sound" role="group" aria-label="Hangok">
+  <button id="sndAmb" aria-pressed="true" title="Erdei háttérhang: madárcsicsergés és szél"><svg viewBox="0 0 24 24"><path d="M3 12c3-4 6-4 9 0s6 4 9 0"/><path d="M3 7c3-3 6-3 9 0"/><path d="M12 17c3 3 6 3 9 0"/></svg><span class="lbl">Erdő</span></button>
+  <button id="sndFx" aria-pressed="true" title="Hangeffektek"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 0 1 0 6"/><path d="M19 6a8 8 0 0 1 0 12"/></svg><span class="lbl">Effektek</span></button>
+</div>
+
+<script>
+const CHARS=[
+ {id:"maana",n:"Maana",d:"Kék kezű dinnyemanólány. A düh emeli, a szeretet a legerősebb."},
+ {id:"por",n:"Por (Morc)",d:"372 éves beszélő kő. Morcos, de mindent számon tart."},
+ {id:"maa",n:"Maa",d:"A mesélő egér. Két betű, meg egy apró szusszanás."},
+ {id:"ohma",n:"Ohma",d:"A falu öreg dinnyemanója, a lékelés mestere."},
+ {id:"dinne",n:"Dinné",d:"Maana anyja. Harminc tél után is szeret."},
+ {id:"neema",n:"Neema",d:"A Kékkezű nagymama a kövimanók völgyéből."},
+ {id:"durm",n:"Durm",d:"Szelídített dőrme. Medvemódra halászik, dorombol."},
+ {id:"jomag",n:"Jómag",d:"Öreg dőrme, préselt rózsaszirmok őrzője."},
+ {id:"tuncsor",n:"Tuncsor",d:"223 éves, unatkozó vizimanó. Az esőről kérdez."},
+ {id:"hetedik",n:"Hetedik",d:"Az első egérkatona, aki megtorpant a füttyszóra."},
+ {id:"csige",n:"Csige",d:"A csiga, aki elhúzza a reteszt."},
+ {id:"grava",n:"A Gráva",d:"Madáristen. Szárnya alatt éj, farkából nap. Mrrrr."},
+ {id:"avral",n:"Avrál",d:"A Gráva gőgből született sötét ikre. Rrrrrm."},
+ {id:"poka",n:"Pókapóka",d:"Acélhálós, hazug alkuk mestere."},
+ {id:"golo",n:"Goloviem",d:"A varázsló, aki elfelejtette önmagát."}
+];
+const GOLD=100, ROLLCOST=10, BONUS=10;
+// Tájak: a mező sorszámtartománya, szín, név
+const REGIONS=[
+ {k:"falu",n:"OHMA falva",c:"--r7",from:0,to:0},
+ {k:"rozsa",n:"A rózsakert",c:"--r2",from:1,to:3},
+ {k:"ko",n:"Kőkatlan",c:"--r3",from:4,to:7},
+ {k:"viz",n:"Trahandem és Kristálytó",c:"--r4",from:8,to:11},
+ {k:"retlak",n:"Rétlak",c:"--r5",from:12,to:15},
+ {k:"sivatag",n:"A sivatag",c:"--r6",from:16,to:19},
+ {k:"kert",n:"A boszorkák kertje",c:"--r1",from:20,to:23},
+ {k:"sotet",n:"Avrál sötétje",c:"--r8",from:24,to:28},
+ {k:"torony",n:"Goloviem tornya",c:"--r6",from:29,to:29}
+];
+const GOAL=29;
+const regionOf=i=>REGIONS.find(r=>i>=r.from&&i<=r.to);
+// Kérdések tájanként a mesékből. o[0] a helyes válasz (kiírásnál keverve). e = varázserő, a = arany jutalom.
+const EVENTS={"rozsa":[{"q":"Mi volt Maana hajában, amikor a kertiboszorkák óriásdinnyéjében felébredt?","o":["Egy mélyvörös rózsaszirom","Egy kék toll","Egy dinnyemag"],"e":2},{"q":"Ki borította ki valójában a felejtés főzetét a rózsakertre?","o":["Maa, az egér","Maana","Pókapóka"],"x":"Szeretetből tette, Goloviemért.","a":25},{"q":"Mit titkolt Maana a falu elől?","o":["Hogy kék a keze","Hogy fél a sötétben","Hogy nem tud lékelni"],"e":3},{"q":"Hány éves Maana az első kötetben?","o":["14","12","16"],"a":30},{"q":"Hová hívta a zümmögés Maanát?","o":["A hegyi rózsakertbe","A Trahandem partjára","A boszorkák padlására"],"e":3},{"q":"Hol ébredt fel Maana a rózsakert után?","o":["A kertiboszorkák óriásdinnyéjében","Egy tölgy odvában","Ohma házában"],"a":20},{"q":"Mi ébresztette fel Maana erejét?","o":["A locsolófőzet","A sziromlé","A Trahandem vize"],"e":3},{"q":"Mit mondott Maana anyja a szélben?","o":["„Maana. Mit tettél?”","„Gyere haza, kislányom!”","„Repülj, Maana!”"],"a":20},{"q":"Hova nem ment el Maana, mert titkolta a kezét?","o":["A lékelésre","A vásárba","A tölgyek ünnepére"],"e":4},{"q":"Ki meséli a Varázserdő Hősét?","o":["Maa, az egér","Por, a kő","Ohma"],"a":25},{"q":"Honnan mesél Maa az első kötetben?","o":["Goloviem mellényzsebéből","A sivatagi gödörből","Maana zsebéből"],"e":2},{"q":"Ki zuhant a szélben Maana mellé?","o":["Por, a beszélő kő","Durm, a dőrme","Csige, a csiga"],"a":25},{"q":"Milyen becenevet adott Maana Pornak?","o":["Morc","Kavics","Kőpapa"],"e":3},{"q":"Ki hallja Por hangját?","o":["Csak az, akiben varázslat van","Mindenki","Csak a kövimanók"],"a":30},{"q":"Mire képes Maana Porral?","o":["Repíti, és a szemén át lát","Arannyá változtatja","Láthatatlanná teszi"],"e":3},{"q":"Ki figyelmeztette Maanát az első kötetben?","o":["Jómag, a dőrme","Tuncsor","Neema"],"a":20},{"q":"Hol áll OHMA falva?","o":["A tölgyek között","A sivatag szélén","A Kristálytó partján"],"e":3},{"q":"Melyik ijesztő mesét mesélte Ohma?","o":["A Kékkezű meséjét","A Gráva meséjét","Az egérkirály meséjét"],"a":20},{"q":"Mivé lett Goloviem, amikor elfelejtette önmagát?","o":["Zsoropóccsá","Avrállá","Pókapókává"],"e":4},{"q":"Mi szórta szét a dinnyemanókat?","o":["Zsoropócs szele","Egy nagy árvíz","Az egérsereg"],"a":25},{"q":"Mi maradt Maana kezén a rózsakert után?","o":["Tövis-karcolás","Kék festék","Mézfolt"],"e":2},{"q":"Hogyan mutatkozik be Maa?","o":["„Két betű, meg egy apró szusszanás a végén.”","„Egy egér vagyok, semmi több.”","„Én vagyok az egérkirály.”"],"a":25}],"ko":[{"q":"Mit írtak a kövimanók a homokba?","o":["TE VAGY A KÉKKEZŰ?","MENJ HAZA!","VIGYÁZZ, ITT A SAS!"],"e":2},{"q":"Ki a Kékkezű, aki a völgyben él?","o":["Neema, a nagymama","Dinné","Kékalóga"],"a":25},{"q":"Mibe fagyasztotta Maana Pókapókát?","o":["Üveggolyóba","Jégcsapba","Gyantacseppbe"],"e":3},{"q":"Hány éves Por, a beszélő kő?","o":["372","223","100"],"x":"Talán 373. Ő maga sem biztos benne.","a":30},{"q":"Mi a kövimanók völgyének neve?","o":["Kőkatlan","Kristálytó","Rétlak"],"e":3},{"q":"Ki nem lát be a Kőkatlanba?","o":["A sas","A nap","A Gráva"],"a":20},{"q":"Milyen gyorsak a kövimanók?","o":["Láthatatlanul gyorsak","Lassúak, mint a csiga","Csak éjjel gyorsak"],"e":3},{"q":"Mit nem tesznek soha a kövimanók?","o":["Nem felejtenek","Nem alszanak","Nem esznek"],"a":20},{"q":"Hová írnak üzenetet a kövimanók?","o":["A homokba","A sziklafalra","Falevelekre"],"e":4},{"q":"Neema altatódalának hányadik versszaka nyit utat?","o":["A negyedik","Az első","A hetedik"],"a":25},{"q":"Kit enged át a hegyfal?","o":["Aki önmagával megbékél","Aki a legerősebb","Aki aranyat fizet"],"e":2},{"q":"Miért látta meg őket a sas?","o":["Por túl magasra repült","Maana kiabált","Tüzet raktak"],"a":25},{"q":"Milyen hálót sző Pókapóka?","o":["Acélhálót","Selyemhálót","Jéghálót"],"e":3},{"q":"Mit tett Maana Pókapókával, mielőtt üveggolyóba fagyasztotta?","o":["Összezsugorította","Elaltatta","Megkötözte"],"a":30},{"q":"Hová tette Maana az üveggolyót?","o":["Az erszényébe","A Dinnyesapkájába","A homokba ásta"],"e":3},{"q":"Mit talált Zsoropócs Maa bundájában?","o":["Egy vörös szirmot","Egy dinnyemagot","Egy kék tollat"],"a":20},{"q":"Hová száműzte Zsoropócs Maát?","o":["Egy sivatagi gödörbe","A torony pincéjébe","A Kristálytó fenekére"],"e":3},{"q":"Mi mutat mindent Maának a gödörben?","o":["Egy esőcsepp","A kristálygömb","A sas szeme"],"a":20},{"q":"Kinek a nagymamája Neema?","o":["Maanáé","Durmé","Pöfé"],"e":4},{"q":"Mi zsugorítja Maana erejét?","o":["A csend","A düh","A szeretet"],"a":25},{"q":"Mi emeli fel Maana erejét?","o":["A düh","A csend","A félelem"],"e":2}],"viz":[{"q":"Merre folyik a Trahandem?","o":["Fölfelé","Körbe-körbe","Lefelé, mint minden folyó"],"e":2},{"q":"Mit nem szeretnek a vizimanók?","o":["A vizet","A mézet","A meséket"],"a":25},{"q":"Mi a vizimanók rangja, amelyre a legbüszkébbek?","o":["Főtörölköző","Vízkirály","Mézőr"],"e":3},{"q":"Mit kap az a dinnyemanó, aki egy nap alatt meglékel egy érett dinnyét?","o":["Dinnyesapkát","Kék gyöngyöt","Lékelőkést"],"a":30},{"q":"Mit lát, aki belenéz a Trahandembe?","o":["Amit a legjobban keres","A jövőjét","A saját árnyékát"],"e":3},{"q":"Hogy hívják a vizimanók tavát?","o":["Kristálytó","Ezüsttó","Holdtó"],"a":20},{"q":"Mit féltenek a vizimanók a legjobban?","o":["A mézüket","A kincsüket","A törölközőiket"],"e":3},{"q":"Milyenek a vizimanók?","o":["Sérthetetlenek","Láthatatlanok","Szárnyasak"],"a":20},{"q":"Ki volt fogoly a vizimanóknál?","o":["Ohma","Dinné","Por"],"e":4},{"q":"Ki őrizte a foglyot?","o":["Tuncsor","A Főtörölköző","Timonimo"],"a":25},{"q":"Hány éves Tuncsor?","o":["223","372","14"],"e":2},{"q":"Miről kérdezget mindig Tuncsor?","o":["Az esőről","A mézről","A napsütésről"],"a":25},{"q":"Mivel utaztak a folyón?","o":["Lapulevél-tutajjal","Dinnyehéj-csónakkal","Kéreg-sajkával"],"e":3},{"q":"Milyen vízesésen jutottak át?","o":["Egy fölfelé zuhanó vízesésen","Egy befagyott vízesésen","Egy forró vízesésen"],"a":30},{"q":"Mi húzta le az iszapba a buborékot?","o":["Por súlya","Durm","Pókapóka hálója"],"e":3},{"q":"Mit mondott Por, amikor Ohma és Maana összeölelkezett?","o":["„Nem kő úgy szorongatni egymást, hékás!”","„Végre!”","„Engem is öleljetek!”"],"a":20},{"q":"Mit tanított meg Ohma Maanának a zárkában?","o":["Lékelni","Úszni","Fütyülni"],"e":3},{"q":"Milyen lett Maana Dinnyesapkája?","o":["Áttetsző, zöldcsíkos, kéken derengő","Piros, fehér pöttyös","Aranysárga, csillagos"],"a":20},{"q":"Mit mondott Ohma Maana lékelésére?","o":["„Ez volt a legszebb lékelés, amit valaha láttam.”","„Majd legközelebb jobban megy.”","„Ezt Neemától tanultad?”"],"e":4},{"q":"Milyen csellel szöktek meg a vizimanóktól?","o":["Vízcsepp-csellel","Alagutat ástak","Álruhát öltöttek"],"a":25},{"q":"Kitől kért bocsánatot Ohma a harmadik kötet végén?","o":["Neemától","Tuncsortól","Pornak"],"e":2}],"retlak":[{"q":"Miért dolgoztak a rétlaki gombák árnyékban?","o":["Azt hitték, a nap megégeti őket","Mert nappal aludtak","Mert Szömörcsög megtiltotta"],"e":2},{"q":"Hogy hívják Szömörcsög unokáját, a kisgombát?","o":["Pöf","Tejp","Kolomp"],"a":25},{"q":"Mivel szelídítették meg Durmot?","o":["Egy „véletlenül” ottfelejtett szendviccsel","Mézes kukoricával","Altatódallal"],"e":3},{"q":"Kinek az igéjével lehet buborékban utazni?","o":["Timonimóéval","Goloviemével","Neemáéval"],"a":30},{"q":"Miben nézegette magát Durm?","o":["Egy hózentrógercsatban","A Trahandem vizében","Egy ezüstkanálban"],"e":3},{"q":"Hogyan halászik Durm?","o":["Medvemódra","Hálóval","Horoggal"],"a":20},{"q":"Mit csinál Durm, ha jól érzi magát?","o":["Dorombol","Fütyül","Táncol"],"e":3},{"q":"Ki szabadította ki Maanát a retekfa indájából?","o":["Tejp","Pöf","Durm"],"a":20},{"q":"Mivel szabadította ki Tejp Maanát?","o":["A gondolataival","Egy lékelőkéssel","Tűzzel"],"e":4},{"q":"Mit mondott Tejp, miután segített?","o":["„Jótett helyébe jót várj!”","„Szívesen, kislány!”","„Ezt nem ingyen tettem.”"],"a":25},{"q":"Mikor mulatnak a rétlaki gombák?","o":["Éjjel","Délben","Soha"],"e":2},{"q":"Mi nem köt meg árnyékban?","o":["A nyálka","A gyanta","A sár"],"a":25},{"q":"Hogyan került Pöf a napra?","o":["Durm kigurította","Maana kivitte","Magától kiment"],"e":3},{"q":"Mit mondott Pöf a napsütésben?","o":["„Meleg.”","„Jaj, égek!”","„Csodás!”"],"a":30},{"q":"Ki vallotta be, hogy ő terjesztette a tévhitet a napról?","o":["Szömörcsög","Tejp","Sziki Csiperke"],"x":"Jó szándékból tette.","e":3},{"q":"Hány pálmalevél kellett az építéshez?","o":["13","7","100"],"a":20},{"q":"Hány lépésnyi kötél kellett az építéshez?","o":["7","13","3"],"e":3},{"q":"Hányszor kellett körbejárni a karót?","o":["Százszor","Hétszer","Egyszer"],"a":20},{"q":"Mi alatt szárad kétszer gyorsabban a fal?","o":["Buborékbúra alatt","Pálmalevél alatt","Esernyő alatt"],"e":4},{"q":"Mit néztek a falon ülve az építés után?","o":["A naplementét","A holdkeltét","A sast"],"a":25},{"q":"Ki maradt Rétlakon, amikor a többiek továbbmentek?","o":["Tuncsor","Por","Durm"],"e":2},{"q":"Mit szólt el Pókapóka a negyedik kötet végén?","o":["Hogy dinnyemanók vannak a sivatagban","Hogy Maa ölte meg a rózsákat","Hogy Goloviem alszik"],"a":25},{"q":"Mi árulta el Pókapókát a hazug alkunál?","o":["A gőgje","A remegő lába","A hangja"],"e":3}],"sivatag":[{"q":"Melyik dallamra torpant meg az egérkatona?","o":["Fütty-fütty-firüttyü","Aludj, aludj, dinnyemag","Csuda helyen élek én"],"e":2},{"q":"Mi lett a neve az első átállt egérkatonának?","o":["Hetedik","Első","Barnaszem"],"a":25},{"q":"Mi volt a legerősebb zár a kőgyűrű kapuján?","o":["Egy mese","Pókapóka acélhálója","Avrál karma"],"x":"A kapu sosem volt bezárva.","e":3},{"q":"Mitől lett a mezőből sivatag?","o":["Egy sóhajtól, uzsonna előtt","Egy villámcsapástól","A Gráva szárnycsapásától"],"a":30},{"q":"Ki tudta az álomcsapda titkát?","o":["Por","Szömörcsög","Neema"],"e":3},{"q":"Ki főzte a tűzszirupot és a jégszirupot?","o":["Szömörcsög","Kékalóga","Ohma"],"a":20},{"q":"Miből készül a tűzszirup és a jégszirup?","o":["Nirátból","Mézből","Rózsaszirmokból"],"e":3},{"q":"Hány árok kell az álomcsapdához?","o":["Kettő","Három","Hét"],"a":20},{"q":"Mit mondott Maana a Grávának a fagyott másodpercben?","o":["„Szabad vagy.”","„Most már az enyém vagy.”","„Vigyél haza!”"],"e":4},{"q":"Kit engedett a Gráva a hátára?","o":["Csak Maanát","Mindenkit","Csak Port"],"a":25},{"q":"Merre indult gyalog Ohma és Neema?","o":["Dél felé","Észak felé","Vissza a faluba"],"e":2},{"q":"Milyen szemű az elvarázsolt egérsereg?","o":["Vörös","Kék","Zöld"],"a":25},{"q":"Milyenre vált az átállt egérkatonák szeme?","o":["Barnára","Kékre","Aranyra"],"e":3},{"q":"Mit köpött ki a Gráva a sivatagban?","o":["Trahandem-vizet","Tüzet","Mézet"],"a":30},{"q":"Mi lett a felébresztett mezőből?","o":["Oázis","Erdő","Tó"],"e":3},{"q":"Ki ásta ki Csigét a homokból?","o":["Durm","Hetedik","Maana"],"a":20},{"q":"Ki melegítette fel Csigét?","o":["Por","A Gráva","Maa"],"e":3},{"q":"Mit mondott Kolomp, amikor meglátta a kaput?","o":["„Hát ez… menő.”","„Ez ijesztő.”","„Gyerünk haza!”"],"a":20},{"q":"Hogyan vitte a Gráva a manókat Rétlakra?","o":["Álmukban","Ébren, a hátán","Buborékban"],"e":4},{"q":"Kinek a neve állt a rémtettek könyvében?","o":["Avrálé","Maáé","Pöfé"],"a":25},{"q":"Mihez lépett Zsoropócs az ötödik kötet végén?","o":["A teáskannához","Az ablakhoz","A kristálygömbhöz"],"e":2}],"kert":[{"q":"Mi Napnyiknóba igazi neve?","o":["Galogpinyócs","Kékalóga","Avrál"],"e":2},{"q":"Mi áll a locsolófőzet receptjének utolsó sorában?","o":["„Valaki, aki dúdol neki. Sokan.”","„Egy csepp holdfény.”","„Három mélyvörös szirom.”"],"a":25},{"q":"Mi szakította át Avrál szárnyát?","o":["A szeretet","A düh","Egy villám"],"e":3},{"q":"Hogy hívják Maana anyját?","o":["Dinné","Neema","Kékalóga"],"a":30},{"q":"Mi történt egyetlen korty teától?","o":["Avrál letakarta az erdőt","Maana elaludt","Megeredt az eső"],"e":3},{"q":"Milyenek a csillagok Avrál sötétjében?","o":["Feketék","Kékek","Vörösek"],"a":20},{"q":"Merre égnek a lángok Avrál sötétjében?","o":["Befelé","Lefelé","Sehogy, kialudtak"],"e":3},{"q":"Hány tél után találkozott újra Neema és Dinné?","o":["30","7","100"],"a":20},{"q":"Mit mondott Dinné a boszorkákról?","o":["„A boszorkák nem gonoszak.”","„Óvakodj tőlük!”","„Ők szórtak szét minket.”"],"e":4},{"q":"Mibe gyűjti Napnyik a napfényt?","o":["Egy kifordított, sárga esernyőbe","Egy fonott kosárba","Egy üvegcsébe"],"a":25},{"q":"Ki préseli át hajnalonként a napcsíkot a sötéten?","o":["A Gráva","Maana","Kékalóga"],"e":2},{"q":"Mi Holdnyiknóba igazi neve?","o":["Kékalóga","Galogpinyócs","Napnyik"],"a":25},{"q":"Milyen csengő szól Kékalógánál?","o":["Ezüst holdcsengő","Arany napharang","Kolomp"],"e":3},{"q":"Hová menekült Maana a boszorkák házában?","o":["A padlásra","A pincébe","A dinnyeföldre"],"a":30},{"q":"Milyen seb volt a boszorkák tarkóján?","o":["Avrál karmának sebe","Tövis karcolása","Pókcsípés"],"e":3},{"q":"Mit hozott fel a Főtörölköző a kertbe?","o":["A hold egy darabkáját","Egy korsó mézet","Egy törölközőt"],"a":20},{"q":"Mit hoztak a gombák a közös dúdoláshoz?","o":["Fényt","Vizet","Követ"],"e":3},{"q":"Mit mondott Maana a napcsíkban állva?","o":["„Varázsló vagyok.”","„Bocsássatok meg!”","„Haza akarok menni.”"],"a":20},{"q":"Mit mondott Dinné, amikor Maana bevallotta a rózsakertet?","o":["„Nem érdekel, mit tettél. Szeretlek.”","„Tudtam!”","„Ezt jóvá kell tenned.”"],"e":4},{"q":"Mekkora lyuk maradt Avrál szárnyán?","o":["Ablaknyi","Gombostűnyi","Akkora, mint az erdő"],"a":25},{"q":"Mit vett elő Zsoropócs a hatodik kötet végén?","o":["A kristálygömböt","A teáskannát","A rémtettek könyvét"],"e":2}],"sotet":[{"q":"Ki Avrál?","o":["A Gráva gőgből született ikre","Pókapóka anyja","Goloviem sasa"],"e":2},{"q":"Mit nyújtott oda Maana Zsoropócsnak a csorba bögrében?","o":["Sziromlevet","Locsolófőzetet","Trahandem-vizet"],"a":25},{"q":"Ki húzta el a torony ajtajának reteszét?","o":["Csige","Durm","Hetedik"],"e":3},{"q":"Mivé lett Pókapóka a mese végén?","o":["Közönséges pókká","Kővé","Sassá"],"a":30},{"q":"Milyen díszdinnye várta Maanát az üres faluban?","o":["Ohma kék pöttyös díszdinnyéje","Egy aranyozott dinnye","Egy lyukas dinnyehéj"],"e":3},{"q":"Hány pötty volt Ohma díszdinnyéjén?","o":["Ahány estét Maanára várt","Hét","Száz"],"a":20},{"q":"Ki Durm nagyapja?","o":["Jómag","Tuncsor","Szömörcsög"],"e":3},{"q":"Milyen szirmokat préselt Jómag?","o":["Barnákat","Fehéreket","Kékeket"],"a":20},{"q":"Honnan indult a sereg a toronyhoz?","o":["A villámsújtotta bükk alól","A sivatagi gödörből","A Kristálytótól"],"e":4},{"q":"Mit csinált a Gráva a torony tetején?","o":["Altatót morgott Avrálnak","Tojást költött","Tüzet köpött"],"a":25},{"q":"Milyen hangot adott a varázsajtó?","o":["RECCS","KOPP","NYIKK"],"e":2},{"q":"Milyen méz csorgott, amikor Zsoropócs felemelte a kezét?","o":["Vörös méz","Aranyméz","Fekete méz"],"a":25},{"q":"Mit mondott Pókapóka a toronyban?","o":["„Az egér elárult.”","„Én győztem!”","„Kegyelem!”"],"e":3},{"q":"Mit vallott be Maa a toronyban?","o":["„Én voltam. Érted tettem.”","„Semmit sem láttam.”","„Pókapóka volt.”"],"a":30},{"q":"Miből itta meg Goloviem a sziromlevet?","o":["A csorba bögréből","Egy aranykehelyből","A teáskanna csőréből"],"e":3},{"q":"Mit nem tartott el Goloviem, amikor ivott?","o":["A kisujját","A Dinnyesapkát","A pálcáját"],"a":20},{"q":"Ki mondta ki újra Goloviem nevét?","o":["Por","Maana","Maa"],"e":3},{"q":"Mivé olvadt vissza Avrál?","o":["A Grávába","Árnyékká","Kristállyá"],"a":20},{"q":"Mi történt, amikor a kristálygömb széttört?","o":["Felkelt a nap","Leszállt az éj","Leomlott az erdő"],"e":4},{"q":"Mit mondott Goloviem az egérnek a mese végén?","o":["„Egyél, Maa.”","„Menj innen!”","„Ki vagy te?”"],"a":25},{"q":"Mit kér Ohma új Kékkezű-meséje?","o":["Kiabáljatok utána, mert emlékezni fog rátok","Bújjatok el előle","Ne beszéljetek róla"],"e":2}]};
+
+
+// ===== Hang: Web Audio szintézis (erdei háttér + apró effektek) =====
+const SND=(()=>{
+  let ctx=null,master,ambBus,fxBus,verb,verbIn,birdBus,windSrc,windGain,birdTimer=null,gustTimer=null,crickTimer=null;
+  const pref=(k,d)=>{try{const v=localStorage.getItem(k);return v===null?d:v==="1"}catch(e){return d}};
+  const save=(k,v)=>{try{localStorage.setItem(k,v?"1":"0")}catch(e){}};
+  let amb=pref("vk-amb",true),fx=pref("vk-fx",true);
+  function init(){
+    if(ctx)return true;
+    const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return false;
+    ctx=new AC();master=ctx.createGain();master.gain.value=.9;master.connect(ctx.destination);
+    ambBus=ctx.createGain();ambBus.gain.value=0;ambBus.connect(master);
+    fxBus=ctx.createGain();fxBus.gain.value=fx?1:0;fxBus.connect(master);
+    // nagy, erdei tér: generált 4,5 mp-es sztereó lecsengés (konvolúciós zengető)
+    verb=ctx.createConvolver();verb.buffer=impulse(4.5,2.6);
+    const verbOut=ctx.createGain();verbOut.gain.value=1;verb.connect(verbOut).connect(ambBus);
+    verbIn=ctx.createGain();verbIn.gain.value=1;
+    const pre=ctx.createDelay(.2);pre.delayTime.value=.045;verbIn.connect(pre).connect(verb);
+    // a madarak és tücskök nagy része a zengetőbe megy, kevés a száraz jel: messziről szólnak
+    birdBus=ctx.createGain();birdBus.gain.value=1;
+    const dry=ctx.createGain();dry.gain.value=.35;birdBus.connect(dry).connect(ambBus);
+    const wet=ctx.createGain();wet.gain.value=1.1;birdBus.connect(wet).connect(verbIn);
+    // az effektekre is jut egy kis tér
+    const fxWet=ctx.createGain();fxWet.gain.value=.22;fxBus.connect(fxWet).connect(verbIn);
+    return true;
+  }
+  function impulse(sec,decay){
+    const len=ctx.sampleRate*sec,b=ctx.createBuffer(2,len,ctx.sampleRate);
+    for(let c=0;c<2;c++){const d=b.getChannelData(c);
+      for(let i=0;i<len;i++){const t=i/len;
+        // korai visszaverődések az első 80 ms-ban (fatörzsek), aztán sűrű, sötétedő lecsengés
+        const early=i<ctx.sampleRate*.08&&Math.random()<.004?(Math.random()*2-1)*.9:0;
+        d[i]=((Math.random()*2-1)*Math.pow(1-t,decay)*(1-.6*t))+early}}
+    return b;
+  }
+  function noiseBuf(sec,brown){
+    const b=ctx.createBuffer(1,ctx.sampleRate*sec,ctx.sampleRate),d=b.getChannelData(0);let last=0;
+    for(let i=0;i<d.length;i++){const w=Math.random()*2-1;if(brown){last=(last+.02*w)/1.02;d[i]=last*3.5}else d[i]=w}
+    return b;
+  }
+  // --- szél: barna zaj, lassan hullámzó szűrővel és hangerővel
+  function startWind(){
+    windSrc=ctx.createBufferSource();windSrc.buffer=noiseBuf(6,true);windSrc.loop=true;
+    const lp=ctx.createBiquadFilter();lp.type="lowpass";lp.frequency.value=500;lp.Q.value=.4;
+    const hp=ctx.createBiquadFilter();hp.type="highpass";hp.frequency.value=80;
+    windGain=ctx.createGain();windGain.gain.value=.05;
+    const lfo=ctx.createOscillator(),lfoG=ctx.createGain();lfo.frequency.value=.07;lfoG.gain.value=220;lfo.connect(lfoG).connect(lp.frequency);lfo.start();
+    windSrc.connect(hp).connect(lp).connect(windGain).connect(ambBus);windGain.connect(verbIn);windSrc.start();
+    // levélsusogás: halk, magas szűrt zaj
+    const rs=ctx.createBufferSource();rs.buffer=noiseBuf(4,false);rs.loop=true;
+    const bp=ctx.createBiquadFilter();bp.type="bandpass";bp.frequency.value=5200;bp.Q.value=.7;
+    const rg=ctx.createGain();rg.gain.value=.006;
+    const l2=ctx.createOscillator(),l2g=ctx.createGain();l2.frequency.value=.13;l2g.gain.value=.004;l2.connect(l2g).connect(rg.gain);l2.start();
+    rs.connect(bp).connect(rg).connect(ambBus);rs.start();
+    const gust=()=>{const t=ctx.currentTime,g=windGain.gain;g.cancelScheduledValues(t);g.setValueAtTime(g.value,t);
+      g.linearRampToValueAtTime(.06+Math.random()*.06,t+2+Math.random()*2.5);g.linearRampToValueAtTime(.035+Math.random()*.02,t+6+Math.random()*3);
+      gustTimer=setTimeout(gust,7000+Math.random()*9000)};
+    gustTimer=setTimeout(gust,3000);
+  }
+  // --- madarak: rövid, csúszó füttyök és trillák, véletlen helyen a térben
+  const BIRDS=[
+    {f:[3200,4200],n:[3,6],dur:.07,gap:.05,sweep:1.25},   // cinege-szerű trilla
+    {f:[2400,2900],n:[2,3],dur:.18,gap:.12,sweep:.82},    // ereszkedő fütty
+    {f:[4300,5200],n:[5,9],dur:.035,gap:.03,sweep:1.1},   // gyors csicsergés
+    {f:[1800,2200],n:[2,2],dur:.22,gap:.25,sweep:1.35}    // „ki-vit”
+  ];
+  function chirp(){
+    const b=BIRDS[Math.floor(Math.random()*BIRDS.length)];
+    const pan=ctx.createStereoPanner?ctx.createStereoPanner():null;
+    const out=ctx.createGain();out.gain.value=.04+Math.random()*.06;
+    if(pan){pan.pan.value=Math.random()*1.8-.9;out.connect(pan).connect(birdBus)}else out.connect(birdBus);
+    const n=b.n[0]+Math.floor(Math.random()*(b.n[1]-b.n[0]+1));
+    const base=b.f[0]+Math.random()*(b.f[1]-b.f[0]);
+    let t=ctx.currentTime+.05;
+    for(let i=0;i<n;i++){
+      const o=ctx.createOscillator(),g=ctx.createGain();o.type="sine";
+      const f0=base*(1+(Math.random()-.5)*.06);
+      o.frequency.setValueAtTime(f0,t);o.frequency.exponentialRampToValueAtTime(f0*b.sweep,t+b.dur);
+      g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(1,t+.008);g.gain.exponentialRampToValueAtTime(.001,t+b.dur);
+      o.connect(g).connect(out);o.start(t);o.stop(t+b.dur+.02);
+      t+=b.dur+b.gap;
+    }
+  }
+  // --- tücskök: 3 tücsök, mindegyik a maga hangmagasságán és ritmusában ciripel, távolról
+  const CRICKETS=[{f:4400,pan:-.7,rate:32,n:3,every:.62,vol:.018},{f:4950,pan:.55,rate:38,n:4,every:.81,vol:.014},{f:4150,pan:.1,rate:28,n:2,every:.47,vol:.011}];
+  let crickNext=[];
+  function cricketTick(){
+    const now=ctx.currentTime,until=now+1.2;
+    CRICKETS.forEach((c,k)=>{
+      if(!crickNext[k]||crickNext[k]<now)crickNext[k]=now+.1+Math.random()*.5;
+      if(!c.node){c.node=ctx.createGain();c.node.gain.value=c.vol;
+        const pn=ctx.createStereoPanner?ctx.createStereoPanner():null;
+        if(pn){pn.pan.value=c.pan;c.node.connect(pn).connect(birdBus)}else c.node.connect(birdBus)}
+      while(crickNext[k]<until){
+        let t=crickNext[k];
+        if(Math.random()<.88){                       // néha kihagy egy ciripelést, mint az igazi
+          for(let i=0;i<c.n;i++){
+            const o=ctx.createOscillator(),g=ctx.createGain();o.type="sine";o.frequency.value=c.f*(1+(Math.random()-.5)*.01);
+            const p=1/c.rate;
+            g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(1,t+p*.25);g.gain.linearRampToValueAtTime(0,t+p*.8);
+            o.connect(g).connect(c.node);o.start(t);o.stop(t+p);t+=p}
+        }
+        crickNext[k]+=c.every*(.92+Math.random()*.16);
+      }
+    });
+    crickTimer=setTimeout(cricketTick,900);
+  }
+  function birdLoop(){chirp();if(Math.random()<.3)setTimeout(()=>ctx&&amb&&chirp(),400+Math.random()*600);birdTimer=setTimeout(birdLoop,1400+Math.random()*4200)}
+  function setAmb(on){
+    amb=on;save("vk-amb",on);if(!init())return;ctx.resume&&ctx.resume();
+    if(on&&!windSrc)startWind();
+    const t=ctx.currentTime;ambBus.gain.cancelScheduledValues(t);ambBus.gain.setValueAtTime(ambBus.gain.value,t);ambBus.gain.linearRampToValueAtTime(on?1:0,t+1.2);
+    clearTimeout(birdTimer);clearTimeout(crickTimer);if(on){birdTimer=setTimeout(birdLoop,800);crickTimer=setTimeout(cricketTick,300)}
+  }
+  function setFx(on){fx=on;save("vk-fx",on);if(ctx)fxBus.gain.value=on?1:0}
+  // --- effekt-építőkockák
+  function tone(f,t,dur,{type="sine",vol=.3,to=null,attack=.005}={}){
+    const o=ctx.createOscillator(),g=ctx.createGain();o.type=type;o.frequency.setValueAtTime(f,t);
+    if(to)o.frequency.exponentialRampToValueAtTime(to,t+dur);
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+attack);g.gain.exponentialRampToValueAtTime(.0008,t+dur);
+    o.connect(g).connect(fxBus);o.start(t);o.stop(t+dur+.05);
+  }
+  function knock(t,vol,freq){
+    const s=ctx.createBufferSource();s.buffer=noiseBuf(.12,false);
+    const bp=ctx.createBiquadFilter();bp.type="bandpass";bp.frequency.value=freq;bp.Q.value=4;
+    const g=ctx.createGain();g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.001,t+.09);
+    s.connect(bp).connect(g).connect(fxBus);s.start(t);
+    tone(freq*.32,t,.08,{type:"triangle",vol:vol*.5});
+  }
+  const ready=()=>fx&&init()&&(ctx.resume&&ctx.resume(),true);
+  return {
+    amb:()=>amb, fx:()=>fx, setAmb, setFx,
+    ctx(){if(!init())return null;ctx.resume&&ctx.resume();return ctx},
+    duck(on){if(!ctx)return;const t=ctx.currentTime;master.gain.cancelScheduledValues(t);master.gain.setValueAtTime(master.gain.value,t);master.gain.linearRampToValueAtTime(on?.25:.9,t+.6)},
+    wake(){if(init()){ctx.resume&&ctx.resume();if(amb)setAmb(true)}},
+    dice(D){if(!ready())return;const t=ctx.currentTime,s=D/1000;
+      knock(t+.02,.25,3400);knock(t+.09,.18,2900);                        // kézből elengedve
+      [[.42,.9],[.76,.55],[.87,.35]].forEach(([o,v])=>{                  // becsapódások
+        knock(t+s*o,v,1500+Math.random()*400);
+        for(let k=1;k<4;k++)knock(t+s*o+k*.035+Math.random()*.02,v*.35/k,2400+Math.random()*900)});
+      knock(t+s*.97,.15,1900)},
+    step(i){if(!ready())return;const t=ctx.currentTime;tone(520+i*40,t,.12,{type:"triangle",vol:.12});tone(1040+i*80,t+.01,.06,{vol:.04})},
+    coin(){if(!ready())return;const t=ctx.currentTime;
+      [0,.09,.15].forEach((d,k)=>{const f=[2637,3136,2794][k];tone(f,t+d,.35,{vol:.14});tone(f*2.76,t+d,.18,{vol:.05});tone(f*5.4,t+d,.08,{vol:.02})})},
+    pay(){if(!ready())return;const t=ctx.currentTime;tone(2349,t,.22,{vol:.08});tone(6480,t,.08,{vol:.02})},
+    magic(){if(!ready())return;const t=ctx.currentTime;
+      [1047,1319,1568,2093,2637].forEach((f,k)=>{tone(f,t+k*.07,.55,{type:"sine",vol:.11});tone(f*2,t+k*.07+.01,.25,{vol:.03})});
+      for(let k=0;k<8;k++)tone(3000+Math.random()*3000,t+.15+Math.random()*.5,.12,{vol:.025})},
+    wrong(){if(!ready())return;const t=ctx.currentTime;knock(t,.3,900);tone(392,t+.05,.22,{type:"triangle",vol:.16,to:330});tone(311,t+.25,.35,{type:"triangle",vol:.14,to:233})},
+    bonus(){this.magic();if(!ready())return;const t=ctx.currentTime+.4;[784,988,1175,1568].forEach((f,k)=>tone(f,t+k*.06,.3,{type:"triangle",vol:.1}))},
+    win(){if(!ready())return;const t=ctx.currentTime;
+      [523,659,784,1047,784,1047,1319].forEach((f,k)=>{tone(f,t+k*.12,.6,{type:"triangle",vol:.13});tone(f*2,t+k*.12,.3,{vol:.04})});
+      [523,659,784].forEach(f=>tone(f,t+.9,1.6,{type:"sine",vol:.1}));
+      for(let k=0;k<16;k++)tone(2500+Math.random()*3500,t+.6+Math.random()*1.4,.15,{vol:.03})}
+  };
+})();
+function syncSoundBtns(){document.getElementById("sndAmb").setAttribute("aria-pressed",SND.amb());document.getElementById("sndFx").setAttribute("aria-pressed",SND.fx())}
+document.getElementById("sndAmb").onclick=()=>{SND.setAmb(!SND.amb());syncSoundBtns()};
+document.getElementById("sndFx").onclick=()=>{SND.setFx(!SND.fx());syncSoundBtns()};
+syncSoundBtns();
+// a böngésző csak felhasználói kattintás után enged hangot: az első érintés indítja az erdőt
+document.addEventListener("pointerdown",function first(){SND.wake();document.removeEventListener("pointerdown",first)},{once:true});
+document.addEventListener("keydown",function firstK(){SND.wake();document.removeEventListener("keydown",firstK)},{once:true});
+
+let S={step:"count",count:0,names:[],picks:{},turn:0};
+const app=document.getElementById("app"),modal=document.getElementById("modal");
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const img=id=>`kepek/kicsi/${id}.jpg`;
+const charOf=i=>CHARS.find(x=>x.id===S.picks[i]);
+const PIPS={1:[4],2:[0,8],3:[0,4,8],4:[0,2,6,8],5:[0,2,4,6,8],6:[0,2,3,5,6,8]};
+// [X, Z] forgatás, amely az n pöttyös lapot a kocka TETEJÉRE fordítja (a 2-es lap alapból felül van)
+const FACE_ROT={1:[90,0],2:[0,0],3:[0,-90],4:[0,90],5:[180,0],6:[-90,0]};
+const faceT=(n,yaw=0)=>{const[x,z]=FACE_ROT[n||1];return `rotateY(${yaw}deg) rotateX(${x}deg) rotateZ(${z}deg)`};
+const dieHTML=n=>`<div class="dice-stage" id="die" role="button" tabindex="0" aria-label="${n?`Dobás: ${n}. Kattints a dobáshoz`:"Kattints a dobáshoz"}">
+  <span class="dice-shadow" id="dshadow"></span>
+  <div class="dice-drop" id="ddrop"><div class="dice-tilt"><div class="cube" id="cube" style="transform:${faceT(n,S.yaw||0)}">
+  ${[1,2,3,4,5,6].map(f=>`<div class="face f${f}">${[...Array(9)].map((_,i)=>`<i class="${PIPS[f].includes(i)?"on":""}"></i>`).join("")}</div>`).join("")}
+  </div></div></div></div>`;
+// kígyózó ösvény: páros sor balról jobbra, páratlan jobbról balra
+function tileCell(i){const r=Math.floor(i/6),c=i%6;return {row:r+1,col:r%2?6-c:c+1}}
+// a rajzolt tábla mezőinek helye a képen (%-ban: bal/széles, felső/magas)
+const BCOL=[[1.408, 15.053], [17.562, 15.141], [33.803, 15.141], [49.868, 15.229], [66.109, 15.141], [82.306, 15.097]],BROW=[[2.595, 18.167], [22.087, 18.273], [41.525, 18.22], [61.123, 18.061], [80.614, 18.008]];
+
+function render(){
+  modal.innerHTML="";
+  if(S.step==="count"){
+    app.innerHTML=`<section class="panel"><h2>Hányan játszotok?</h2>
+      <div class="counts">${[1,2,3,4,5,6].map(n=>`<button class="count" data-n="${n}" aria-label="${n} játékos">${n}</button>`).join("")}</div>
+      <p class="note">Mindenki választ egy szereplőt a Varázserdőből, és száz aranyat kap útravalónak.</p></section>`;
+    app.querySelectorAll(".count").forEach(b=>b.onclick=()=>{S.count=+b.dataset.n;S.names=Array(S.count).fill("").map((_,i)=>S.names[i]||"");S.step="names";render()});
+  }
+  else if(S.step==="names"){
+    app.innerHTML=`<section class="panel"><h2>Írjátok be a neveteket</h2>
+      <form class="names" id="nf">${S.names.map((v,i)=>`<label for="p${i}">${i+1}. játékos<input id="p${i}" maxlength="18" autocomplete="off" value="${esc(v)}" placeholder="Név"></label>`).join("")}</form>
+      <div class="row"><button class="btn ghost" id="back">Vissza</button><button class="btn" id="go" form="nf">Tovább</button></div></section>`;
+    const f=document.getElementById("nf"),go=document.getElementById("go");
+    const ins=[...f.querySelectorAll("input")];
+    const chk=()=>{S.names=ins.map(i=>i.value.trim());go.disabled=S.names.some(n=>!n)};
+    ins.forEach(i=>i.oninput=chk);chk();ins[0].focus();
+    f.onsubmit=e=>{e.preventDefault();chk();if(go.disabled)return;S.picks={};S.turn=0;S.dealt=false;S.step="pick";render()};
+    document.getElementById("back").onclick=()=>{S.step="count";render()};
+  }
+  else if(S.step==="pick"){
+    const owner={};Object.entries(S.picks).forEach(([p,c])=>owner[c]=+p);
+    const done=S.turn>=S.count;
+    app.innerHTML=`<section class="panel"><h2>Válasszatok szereplőt!</h2>
+      <p class="turn">${done?"Mindenki választott.":`<b>${esc(S.names[S.turn])}</b>, te jössz. Koppints egy szereplőre.`}</p>
+      <div class="grid ${S.dealt?"":"deal"}">${CHARS.map((c,i)=>{const o=owner[c.id];const t=o!==undefined;
+        return `<button class="card" data-id="${c.id}" ${t||done?"disabled":""} style="animation-delay:${i*45}ms">
+          <img src="${img(c.id)}" alt="${esc(c.n)}" loading="lazy">${t?`<span class="owner">${esc(S.names[o])}</span>`:""}
+          <span class="t"><span class="n">${esc(c.n)}</span><span class="d">${esc(c.d)}</span></span></button>`}).join("")}</div>
+      <div class="row"><button class="btn ghost" id="undo" ${S.turn===0?"disabled":""}>Visszavonás</button>${done?`<button class="btn" id="start">Indulhat a kaland</button>`:""}</div></section>`;
+    S.dealt=true;
+    app.querySelectorAll(".card:not(:disabled)").forEach(b=>b.onclick=()=>{S.picks[S.turn]=b.dataset.id;S.turn++;render()});
+    document.getElementById("undo").onclick=()=>{if(S.turn>0){S.turn--;delete S.picks[S.turn];render()}};
+    const st=document.getElementById("start");if(st)st.onclick=startGame;
+  }
+  else if(S.step==="board") renderBoard();
+  else if(S.step==="end") renderEnd();
+}
+
+function startGame(){
+  S.players=S.names.map((n,i)=>({pos:0,gold:GOLD,magic:0,done:false}));
+  S.cur=0;S.round=1;S.die=0;S.phase="roll";S.event=null;S.finishOrder=[];S.used={};
+  S.log="Mindenki OHMA falvában áll, száz arannyal a zsebében.";
+  S.step="board";render();
+}
+
+function renderBoard(){
+  modal.innerHTML="";
+  const P=S.players;
+  let tiles="";
+  for(let i=0;i<=GOAL;i++){
+    const r=regionOf(i),{row,col}=tileCell(i);
+    const first=i===r.from;
+    const here=P.map((p,k)=>p.pos===i?k:-1).filter(k=>k>=0);
+    const[cl,cw]=BCOL[col-1],[rt,rh]=BROW[row-1];
+    tiles+=`<div class="tile ${here.length?"occ":""} ${here.includes(S.cur)?"here":""}" style="left:${cl}%;top:${rt}%;width:${cw}%;height:${rh}%">
+      <span class="num">${i===0?"Start":i===GOAL?"Cél":i}</span>
+      <span class="lab">${first||i===GOAL?esc(r.n):""}</span>
+      <span class="toks">${here.map(k=>`<img class="tok ${k===S.cur?"cur":""}" src="${img(S.picks[k])}" alt="${esc(S.names[k])}">`).join("")}</span></div>`;
+  }
+  const cp=P[S.cur];
+  app.innerHTML=`<section class="panel">
+    <h2>${S.round}. kör</h2>
+    <div class="boardwrap">
+    <div class="board" role="img" aria-label="Játéktábla OHMA falvától Goloviem tornyáig">${tiles}</div>
+    <div class="tray">
+      <p class="turn"><b>${esc(S.names[S.cur])}</b> (${esc(charOf(S.cur).n)}) következik.</p>
+      ${dieHTML(S.die)}
+      <img class="sig" src="kepek/alairas.png" alt="Kutika Ádám">
+    </div></div>
+    <div class="hud">
+      <button class="btn" id="roll" ${S.phase!=="roll"?"disabled":""}>Dobás · ${ROLLCOST} arany</button>
+      <p class="cr" style="text-align:center">Minden dobás ${ROLLCOST} aranyba kerül. Ha összegyűlik ${BONUS} varázserőd, még egyet dobhatsz.</p>
+      <p class="log" aria-live="polite">${esc(S.log||"")}</p>
+    </div>
+    <div class="players">${P.map((p,i)=>`<div class="player ${i===S.cur?"cur":""}">
+      <img src="${img(S.picks[i])}" alt="${esc(charOf(i).n)}"><div class="t">
+      <span class="pn">${esc(S.names[i])}</span><span class="pc">${esc(charOf(i).n)} · ${p.done?"célba ért":p.pos===0?"start":p.pos+". mező"}</span>
+      <span class="stats"><span class="gold"><span class="coin" aria-hidden="true"></span>${p.gold}</span><span class="magic"><span class="spark" aria-hidden="true"></span>${p.magic} varázserő</span></span>
+      </div></div>`).join("")}</div>
+    <div class="row"><button class="btn ghost" id="quit">Új játék</button></div>
+  </section>`;
+  document.getElementById("roll").onclick=roll;
+  const dz=document.getElementById("die");dz.onclick=roll;dz.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();roll()}};
+  document.getElementById("quit").onclick=()=>{S={step:"count",count:0,names:S.names,picks:{},turn:0};render()};
+  if(S.phase==="event"&&S.event) showEvent();
+}
+
+function roll(){
+  if(S.phase!=="roll")return;
+  S.phase="moving";
+  {const p=S.players[S.cur];S.paid=p.gold>=ROLLCOST;if(S.paid){p.gold-=ROLLCOST;SND.pay()}}
+  const n=1+Math.floor(Math.random()*6);
+  const btn=document.getElementById("roll");btn.disabled=true;
+  S.die=n;
+  const cube=document.getElementById("cube"),drop=document.getElementById("ddrop"),sh=document.getElementById("dshadow");
+  if(reduce||!cube.animate){cube.style.transform=faceT(n);document.getElementById("die").setAttribute("aria-label",`Dobás: ${n}`);setTimeout(()=>move(n),150);return}
+  const[fx,fz]=FACE_ROT[n];
+  const fy=90*Math.floor(Math.random()*4);              // a felső lap marad felül, csak körbefordul
+  const sgn=()=>Math.random()<.5?-1:1;
+  const sx=fx+360*(2+Math.floor(Math.random()*2))*sgn();
+  const sy=fy+360*(1+Math.floor(Math.random()*2))*sgn();
+  const sz=fz+360*sgn();
+  S.yaw=fy;
+  const D=1500;
+  SND.dice(D);
+  cube.animate([
+    {transform:`rotateY(${sy}deg) rotateX(${sx}deg) rotateZ(${sz}deg)`},
+    {transform:`rotateY(${fy+(sy-fy)*.18}deg) rotateX(${fx+(sx-fx)*.18}deg) rotateZ(${fz+(sz-fz)*.12}deg)`,offset:.55},
+    {transform:`rotateY(${fy+6}deg) rotateX(${fx-8}deg) rotateZ(${fz-4}deg)`,offset:.8},
+    {transform:`rotateY(${fy}deg) rotateX(${fx}deg) rotateZ(${fz}deg)`}
+  ],{duration:D,easing:"cubic-bezier(.2,.7,.3,1)",fill:"forwards"});
+  const dk=[
+    {transform:"translateY(-190px) scale(.86)",easing:"cubic-bezier(.55,0,1,.45)"},
+    {transform:"translateY(0) scale(1.04,.94)",offset:.42,easing:"cubic-bezier(0,.55,.45,1)"},
+    {transform:"translateY(-46px) scale(1)",offset:.6,easing:"cubic-bezier(.55,0,1,.45)"},
+    {transform:"translateY(0) scale(1.02,.97)",offset:.76,easing:"cubic-bezier(0,.55,.45,1)"},
+    {transform:"translateY(-12px)",offset:.87,easing:"cubic-bezier(.55,0,1,.45)"},
+    {transform:"translateY(0)"}
+  ];
+  drop.animate(dk,{duration:D,fill:"forwards"});
+  sh.animate([
+    {transform:"scale(.3)",opacity:.2},{transform:"scale(1.1)",opacity:1,offset:.42},
+    {transform:"scale(.75)",opacity:.6,offset:.6},{transform:"scale(1.05)",opacity:1,offset:.76},
+    {transform:"scale(.95)",opacity:.9,offset:.87},{transform:"scale(1)",opacity:1}
+  ],{duration:D,fill:"forwards"});
+  setTimeout(()=>{document.getElementById("die").setAttribute("aria-label",`Dobás: ${n}`);setTimeout(()=>move(n),350)},D);
+}
+const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function move(n){
+  const p=S.players[S.cur];let left=n;
+  const step=()=>{
+    if(left===0||p.pos===GOAL){arrive();return}
+    p.pos++;left--;SND.step(n-left-1);S.log=`${S.names[S.cur]} ${n}-et dobott ${S.paid?`(−${ROLLCOST} arany)`:"(nem volt elég aranya, ezt a dobást Maa állta)"}.`;renderBoard();
+    setTimeout(step,reduce?0:260);
+  };
+  step();
+}
+
+function pickEvent(region){
+  const pool=EVENTS[region];if(!pool)return null;
+  S.used[region]=S.used[region]||[];
+  let free=pool.map((_,i)=>i).filter(i=>!S.used[region].includes(i));
+  if(!free.length){S.used[region]=[];free=pool.map((_,i)=>i)}
+  const i=free[Math.floor(Math.random()*free.length)];S.used[region].push(i);
+  const order=[0,1,2].sort(()=>Math.random()-.5);return {region,idx:i,order};
+}
+
+function arrive(){
+  const p=S.players[S.cur];
+  if(p.pos===GOAL){
+    p.done=true;S.finishOrder.push(S.cur);
+    S.log=`${S.names[S.cur]} célba ért Goloviem tornyánál!`;
+    SND.win();S.step="end";render();return;
+  }
+  const r=regionOf(p.pos);
+  S.event=pickEvent(r.k);S.choice=null;S.phase="event";renderBoard();
+}
+
+function rewardHTML(ev){return ev.e?`<span class="magic"><span class="spark" aria-hidden="true"></span>+${ev.e} varázserő</span>`:`<span class="gold"><span class="coin" aria-hidden="true"></span>+${ev.a} arany</span>`}
+// ===== Súgó a hangjátékból =====
+// A 7 kötet teljes kevert hangjátéka (OHMA_N_..._SFX_mix.mp3) a játék mellett van: hang/mix/k{kötet}_{darab}.mp3,
+// 10 perces darabokban (egy fájl legfeljebb 15 MB lehet). A lejátszófej a mix megadott pontjára ugrik.
+// HINTS: "kérdés-azonosító": [kötet, kezdet mp, vége mp] — idő a kötet TELJES SFX MIXÉBEN mérve.
+// Ha a mese módosul, csak ezeket a számokat kell átírni. A vége után HINT_FADE mp alatt halkul el.
+const HINT_COST_GOLD=10, HINT_FADE=3, CHUNK=600;
+const HINTS={
+ "rozsa-0":[1,910.85,929.47], "rozsa-1":[7,3066.82,3088.94], "rozsa-2":[1,3442.50,3457.38], "rozsa-3":[1,218.02,229.48],
+ "rozsa-4":[1,735.89,750.23], "rozsa-5":[1,1243.63,1266.31], "rozsa-6":[1,1487.04,1503.66], "rozsa-7":[1,3701.63,3706.69],
+ "rozsa-8":[1,270.35,284.47], "rozsa-9":[1,25.52,34.52], "rozsa-10":[1,34.33,42.98], "rozsa-11":[1,2025.58,2038.88],
+ "rozsa-12":[1,2496.50,2511.16], "rozsa-13":[1,2048.67,2060.45], "rozsa-14":[1,2653.98,2673.72], "rozsa-15":[1,3046.93,3052.81],
+ "rozsa-16":[1,132.00,145.86], "rozsa-17":[1,380.81,389.03], "rozsa-18":[1,1155.92,1167.88], "rozsa-19":[1,1181.33,1192.29],
+ "rozsa-20":[1,906.10,921.06], "rozsa-21":[1,28.91,37.81], "ko-0":[2,381.50,386.94], "ko-1":[2,873.59,889.35],
+ "ko-2":[2,2822.46,2835.24], "ko-3":[2,1229.98,1247.30], "ko-4":[2,652.98,669.32], "ko-5":[2,66.71,77.15],
+ "ko-6":[2,604.08,612.48], "ko-7":[2,696.88,707.50], "ko-8":[2,582.30,595.66], "ko-9":[2,2268.88,2284.30],
+ "ko-10":[2,3036.21,3044.61], "ko-11":[2,1244.34,1262.16], "ko-12":[2,1840.37,1852.93], "ko-13":[2,2853.54,2869.62],
+ "ko-14":[2,2937.57,2950.31], "ko-15":[2,3602.77,3616.45], "ko-16":[2,3684.81,3704.03], "ko-17":[3,67.93,75.17],
+ "ko-18":[2,3184.86,3208.38], "ko-19":[2,1210.98,1224.22], "ko-20":[2,1208.00,1217.52], "viz-0":[3,225.05,235.55],
+ "viz-1":[3,583.12,598.20], "viz-2":[3,598.00,612.20], "viz-3":[3,1035.42,1050.56], "viz-4":[3,309.41,322.05],
+ "viz-5":[3,468.55,480.47], "viz-6":[3,692.45,710.21], "viz-7":[3,717.36,727.20], "viz-8":[3,815.35,822.95],
+ "viz-9":[3,819.54,828.78], "viz-10":[3,826.78,836.46], "viz-11":[3,912.11,919.17], "viz-12":[3,1108.51,1118.91],
+ "viz-13":[3,1269.80,1281.94], "viz-14":[3,1863.51,1872.59], "viz-15":[3,2643.85,2660.09], "viz-16":[3,3129.36,3141.18],
+ "viz-17":[3,3528.75,3548.79], "viz-18":[3,3372.64,3383.00], "viz-19":[3,3749.33,3771.05], "viz-20":[3,4137.38,4155.98],
+ "retlak-0":[4,2469.13,2483.31], "retlak-1":[4,3643.71,3660.77], "retlak-2":[4,304.07,319.19], "retlak-3":[4,2824.39,2842.95],
+ "retlak-4":[4,264.30,276.50], "retlak-5":[4,630.37,640.97], "retlak-6":[4,879.96,896.14], "retlak-7":[4,2043.37,2055.51],
+ "retlak-8":[4,1995.93,2010.41], "retlak-9":[4,2041.93,2054.01], "retlak-10":[4,1727.65,1735.97], "retlak-11":[4,2246.73,2254.39],
+ "retlak-12":[4,4925.32,4943.76], "retlak-13":[4,3930.11,3937.85], "retlak-14":[4,4105.26,4113.72], "retlak-15":[4,4680.97,4687.53],
+ "retlak-16":[4,4481.30,4492.02], "retlak-17":[4,4506.51,4524.45], "retlak-18":[4,4783.26,4806.26], "retlak-19":[4,4925.32,4943.76],
+ "retlak-20":[4,4987.78,4994.60], "retlak-21":[4,5267.34,5281.50], "retlak-22":[4,3531.32,3542.42], "sivatag-0":[5,3639.09,3657.31],
+ "sivatag-1":[5,2830.31,2850.03], "sivatag-2":[5,3793.20,3805.00], "sivatag-3":[5,2008.01,2027.15], "sivatag-4":[5,646.86,658.96],
+ "sivatag-5":[5,721.72,727.74], "sivatag-6":[5,730.40,739.32], "sivatag-7":[5,649.67,661.51], "sivatag-8":[5,1260.31,1283.69],
+ "sivatag-9":[5,1369.93,1387.67], "sivatag-10":[5,1607.16,1617.44], "sivatag-11":[5,2785.31,2793.61], "sivatag-12":[5,2699.60,2722.80],
+ "sivatag-13":[5,2883.47,2905.01], "sivatag-14":[5,3260.66,3272.48], "sivatag-15":[5,3258.07,3265.97], "sivatag-16":[5,3364.61,3374.17],
+ "sivatag-17":[5,3912.53,3925.51], "sivatag-18":[5,3963.32,3970.06], "sivatag-19":[5,1869.34,1889.54], "sivatag-20":[5,4215.41,4231.73],
+ "kert-0":[6,2959.57,2967.69], "kert-1":[6,3234.95,3239.95], "kert-2":[6,4689.58,4701.70], "kert-3":[6,1033.64,1050.92],
+ "kert-4":[6,249.91,257.61], "kert-5":[6,538.19,547.81], "kert-6":[6,345.59,362.23], "kert-7":[6,585.11,591.67],
+ "kert-8":[6,1148.22,1169.58], "kert-9":[6,1437.99,1453.99], "kert-10":[6,1390.74,1410.12], "kert-11":[6,2016.87,2025.41],
+ "kert-12":[6,3958.53,3969.59], "kert-13":[6,1735.10,1747.30], "kert-14":[6,1113.91,1124.05], "kert-15":[6,3747.29,3770.09],
+ "kert-16":[6,3339.32,3357.40], "kert-17":[6,4221.85,4233.83], "kert-18":[6,4630.16,4641.28], "kert-19":[6,5218.00,5228.20],
+ "kert-20":[6,5250.00,5264.60], "sotet-0":[7,1708.80,1721.44], "sotet-1":[7,3330.78,3347.54], "sotet-2":[7,1845.17,1853.23],
+ "sotet-3":[7,4001.82,4014.22], "sotet-4":[7,423.65,436.35], "sotet-5":[7,501.29,506.77], "sotet-6":[7,4359.52,4371.34],
+ "sotet-7":[7,714.00,722.66], "sotet-8":[7,995.93,1012.21], "sotet-9":[7,3416.54,3431.46], "sotet-10":[7,2019.07,2034.73],
+ "sotet-11":[7,2412.05,2431.27], "sotet-12":[7,2800.31,2810.99], "sotet-13":[7,3137.99,3152.89], "sotet-14":[7,3396.44,3411.10],
+ "sotet-15":[7,3479.81,3493.79], "sotet-16":[7,4127.05,4134.95], "sotet-17":[7,3854.83,3878.11], "sotet-18":[7,3894.38,3915.88],
+ "sotet-19":[7,3970.07,3976.89], "sotet-20":[7,4467.06,4488.40]
+};
+let hintEls=[],hintGain=null,hintNodes=[],hintTimers=[];
+const hintKey=()=>`${S.event.region}-${S.event.idx}`;
+const ICON_SPK=`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 0 1 0 6"/></svg>`;
+function hintHTML(){
+  if(!HINTS[hintKey()])return "";
+  const p=S.players[S.cur];
+  if(S.event.hinted) return `<div class="hint"><button class="btn ghost hintbtn" id="hintagain">${ICON_SPK} Meghallgatom újra</button><p class="cr" id="hintstat" aria-live="polite"></p></div>`;
+  const ok=p.gold>=HINT_COST_GOLD;
+  return `<div class="hint">
+    <button class="btn ghost hintbtn gold" id="hintbuy" ${ok?"":"disabled"}>${ICON_SPK} Súgó a hangjátékból · <span class="coin" aria-hidden="true"></span> ${HINT_COST_GOLD} arany</button>
+    <p class="cr">${ok?"Maa felolvassa azt a részt, amiből kiderül a válasz.":`Ehhez ${HINT_COST_GOLD} arany kell, neked most ${p.gold} van.`}</p>
+  </div>`;
+}
+function bindHint(){
+  const buy=document.getElementById("hintbuy");
+  if(buy)buy.onclick=()=>{const p=S.players[S.cur];if(p.gold<HINT_COST_GOLD)return;
+    p.gold-=HINT_COST_GOLD;SND.pay();S.log=`${S.names[S.cur]} meghallgatta a súgót (−${HINT_COST_GOLD} arany).`;
+    S.event.hinted=true;showEvent();playHint()};
+  const again=document.getElementById("hintagain");if(again)again.onclick=playHint;
+}
+function setHintStat(t){const el=document.getElementById("hintstat");if(el)el.textContent=t}
+const chunkUrl=(v,k)=>`hang/mix/k${v}_${String(k).padStart(2,"0")}.mp3`;
+function playHint(){
+  const h=HINTS[hintKey()];if(!h)return;
+  const[v,s,e]=h,len=e-s,total=len+HINT_FADE,k=Math.floor(s/CHUNK),off=s-k*CHUNK;
+  stopHint(true);
+  const ctx=SND.ctx();
+  // a lejátszandó szakasz darabjai (ha a rész két 10 perces darab határára esik, kettő)
+  const parts=[{k,off,dur:Math.min(total,CHUNK-off)}];
+  if(total>CHUNK-off)parts.push({k:k+1,off:0,dur:total-(CHUNK-off)});
+  if(ctx){hintGain=ctx.createGain();hintGain.gain.value=0;hintGain.connect(ctx.destination)}
+  hintEls=parts.map(pt=>{const a=new Audio(chunkUrl(v,pt.k));a.preload="auto";
+    if(ctx){try{const n=ctx.createMediaElementSource(a);n.connect(hintGain);hintNodes.push(n)}catch(err){}}return a});
+  setHintStat("Betöltöm a hangjátékot…");SND.duck(true);
+  const first=hintEls[0];
+  first.addEventListener("loadedmetadata",()=>{
+    first.currentTime=parts[0].off;
+    first.play().then(()=>{
+      setHintStat(`Maa mesél a ${v}. kötetből…`);
+      // halkítás: Web Audio (iPhone-on az audio.volume nem állítható); tartalék: volume
+      if(hintGain){const t=ctx.currentTime;hintGain.gain.setValueAtTime(0,t);hintGain.gain.linearRampToValueAtTime(1,t+.3);
+        hintGain.gain.setValueAtTime(1,t+len);hintGain.gain.linearRampToValueAtTime(0,t+total)}
+      else{const t0=performance.now();hintTimers.push(setInterval(()=>{const el=(performance.now()-t0)/1000;
+        hintEls.forEach(a=>a.volume=el>len?Math.max(0,1-(el-len)/HINT_FADE):1)},80))}
+      if(hintEls[1]){hintEls[1].load();hintTimers.push(setTimeout(()=>{first.pause();hintEls[1].currentTime=0;hintEls[1].play().catch(()=>{})},parts[0].dur*1000))}
+      hintTimers.push(setTimeout(()=>stopHint(),(total+.15)*1000));
+    }).catch(()=>{setHintStat("A lejátszás nem indult el. Koppints újra a gombra.");SND.duck(false)});
+  },{once:true});
+  first.onerror=()=>{setHintStat("Ezt a részt most nem sikerült betölteni.");SND.duck(false)};
+}
+function stopHint(keep){
+  hintTimers.forEach(t=>{clearTimeout(t);clearInterval(t)});hintTimers=[];
+  hintEls.forEach(a=>{try{a.pause();a.removeAttribute("src");a.load()}catch(e){}});
+  try{hintNodes.forEach(n=>n.disconnect());hintGain&&hintGain.disconnect()}catch(e){}
+  hintEls=[];hintNodes=[];hintGain=null;
+  if(!keep){SND.duck(false);setHintStat("")}
+}
+
+function showEvent(){
+  const ev=EVENTS[S.event.region][S.event.idx];
+  const r=REGIONS.find(x=>x.k===S.event.region);
+  const name=S.names[S.cur];
+  const head=`<p class="place">${esc(r.n)} · ${esc(name)}</p>`;
+  if(S.choice===null){
+    modal.innerHTML=`<div class="veil"><div class="story" role="dialog" aria-modal="true" aria-labelledby="evt">
+      ${head}<h3 id="evt">${esc(ev.q)}</h3>
+      <p class="cr">Jó válaszért jutalom: <span class="gain" style="display:inline-flex;font-size:17px">${rewardHTML(ev)}</span></p>
+      <div class="choices">${S.event.order.map((oi,n)=>`<button class="choice" data-i="${oi}"><span class="ct">${"ABC"[n]}) ${esc(ev.o[oi])}</span></button>`).join("")}</div>
+      ${hintHTML()}
+    </div></div>`;
+    modal.querySelectorAll(".choice").forEach(b=>b.onclick=()=>choose(+b.dataset.i));
+    bindHint();
+    modal.querySelector(".choice").focus();
+  } else {
+    const ok=S.choice===0;
+    modal.innerHTML=`<div class="veil"><div class="story" role="dialog" aria-modal="true" aria-labelledby="evt">
+      ${head}<h3 id="evt">${ok?"Helyes!":"Nem talált."}</h3>
+      <p class="result">${ok?"":`A helyes válasz: <b>${esc(ev.o[0])}</b>. `}${esc(ev.x||"")}</p>
+      <div class="gain">${ok?rewardHTML(ev):`<span class="cr">Most nincs jutalom.</span>`}</div>
+      <div class="row"><button class="btn" id="next">Tovább</button></div>
+    </div></div>`;
+    const nx=document.getElementById("next");nx.onclick=nextTurn;nx.focus();
+  }
+}
+
+function choose(i){
+  stopHint();
+  const ev=EVENTS[S.event.region][S.event.idx],p=S.players[S.cur];
+  S.choice=i;
+  if(i===0){ev.e?SND.magic():SND.coin();p.magic+=ev.e||0;p.gold+=ev.a||0;S.log=`${S.names[S.cur]} jól válaszolt: ${ev.e?`+${ev.e} varázserő`:`+${ev.a} arany`}.`}
+  else{SND.wrong();S.log=`${S.names[S.cur]} most nem talált.`}
+  showEvent();
+}
+
+function nextTurn(){
+  S.event=null;S.choice=null;S.phase="roll";
+  const cp=S.players[S.cur];
+  if(!cp.done&&cp.magic>=BONUS){cp.magic-=BONUS;SND.bonus();S.log=`${S.names[S.cur]} összegyűjtött ${BONUS} varázserőt: még egyet dobhat!`;renderBoard();return}
+  const n=S.players.length;let k=S.cur;
+  do{k=(k+1)%n;if(k===0)S.round++}while(S.players[k].done&&S.players.some(p=>!p.done));
+  S.cur=k;renderBoard();
+}
+
+function renderEnd(){
+  const w=S.finishOrder[0],P=S.players;
+  const order=P.map((p,i)=>i).sort((a,b)=>(P[b].pos-P[a].pos)||(P[b].magic-P[a].magic)||(P[b].gold-P[a].gold));
+  app.innerHTML=`<section class="panel">
+    <h2>${esc(S.names[w])} célba ért!</h2>
+    <p class="note">${esc(charOf(w).n)} elsőként érkezett Goloviem tornyához, a ${S.round}. körben. A torony kapuja kinyílt.</p>
+    <img src="${img(S.picks[w])}" alt="${esc(charOf(w).n)}" style="width:140px;height:140px;border-radius:50%;object-fit:cover;border:4px solid var(--gold)">
+    <div class="podium">${order.map((i,rank)=>`<div class="player ${i===w?"cur":""}"><img src="${img(S.picks[i])}" alt="${esc(charOf(i).n)}"><div class="t">
+      <span class="pn">${rank+1}. ${esc(S.names[i])}</span><span class="pc">${esc(charOf(i).n)} · ${P[i].pos===GOAL?"célban":P[i].pos+". mező"}</span>
+      <span class="stats"><span class="gold"><span class="coin" aria-hidden="true"></span>${P[i].gold}</span><span class="magic"><span class="spark" aria-hidden="true"></span>${P[i].magic} varázserő</span></span></div></div>`).join("")}</div>
+    <div class="row"><button class="btn ghost" id="again">Új játék</button><button class="btn" id="rematch">Visszavágó</button></div>
+  </section>`;
+  document.getElementById("again").onclick=()=>{S={step:"count",count:0,names:[],picks:{},turn:0};render()};
+  document.getElementById("rematch").onclick=startGame;
+}
+
+function start(d){if(d&&d.step)S=d;if(S.phase==="moving")S.phase="roll";render()}
+window.claude?.hot?.snapshot?.(()=>S);
+window.claude?.hot?.ready?window.claude.hot.ready(start):start(window.claude?.hot?.data??{});
+</script>
+
+</body></html>
