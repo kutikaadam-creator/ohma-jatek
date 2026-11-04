@@ -1,5 +1,4 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
-<title>Varázserdő Kalandjai</title>
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body><title>Varázserdő Kalandjai</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+SC:wght@700;800&family=Alegreya+Sans:wght@400;500;700&family=Alegreya:ital@0;1&display=swap">
@@ -144,6 +143,22 @@ h2{font-family:var(--display);font-size:clamp(22px,4.5vw,30px);margin:0;text-ali
 .hintpay{display:flex;gap:10px;flex-wrap:wrap}
 .hintbtn.gold{color:var(--gold);border-color:var(--gold)}
 .hinttxt{font-family:var(--tale);font-style:italic;font-size:16px;line-height:1.5;color:var(--muted);margin:0;border-left:3px solid var(--magic);padding-left:10px}
+.vault{display:flex;flex-direction:column;align-items:center;gap:14px;padding-block:8px 4px;border-top:1px solid var(--line)}
+.vaultform{display:flex;flex-direction:column;gap:6px;align-items:center;width:100%;max-width:420px}
+.vaultform label{font-family:var(--display);font-size:16px;letter-spacing:.06em;color:var(--muted)}
+.vaultrow{display:flex;gap:8px;width:100%}
+.vaultrow input{flex:1;min-width:0;font:inherit;padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:var(--paper);color:var(--ink)}
+.vaultrow input:focus-visible{outline:2px solid var(--moss);outline-offset:1px}
+.vaultrow .btn{font-size:17px;padding:6px 18px}
+#vaultlist{width:100%;max-width:640px;display:flex;flex-direction:column;gap:8px}
+.vhead{font-family:var(--display);font-size:20px;text-align:center;margin:0}
+.vitem{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:10px 14px}
+.vitem .vt{flex:1 1 180px;font-family:var(--display);font-size:17px;min-width:0}
+[hidden]{display:none!important}
+.vlinks{display:flex;gap:8px;flex-wrap:wrap}
+.vitem a{display:inline-flex;align-items:center;gap:6px;font-weight:700;text-decoration:none;color:var(--moss);border:1px solid var(--moss);border-radius:999px;padding:4px 12px;font-size:14px}
+.vitem a.aud{color:var(--magic);border-color:var(--magic)}
+.vitem a:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 @media (prefers-reduced-motion:reduce){.deal .card,.story,.tok.cur{animation:none}.card{transition:none}}
 </style>
 
@@ -154,6 +169,17 @@ h2{font-family:var(--display);font-size:clamp(22px,4.5vw,30px);margin:0;text-ali
     <p class="sub">társasjáték Ohma meséje nyomán</p></div>
   </header>
   <main id="app"></main>
+  <footer class="vault">
+    <form id="vaultform" class="vaultform" autocomplete="off">
+      <label for="vaultpw">Mesemondó-zug</label>
+      <div class="vaultrow">
+        <input id="vaultpw" type="password" placeholder="Titkos jelszó" aria-describedby="vaultmsg">
+        <button class="btn ghost" id="vaultgo" type="submit">Belépés</button>
+      </div>
+      <p class="cr" id="vaultmsg" aria-live="polite"></p>
+    </form>
+    <div id="vaultlist" hidden></div>
+  </footer>
 </div>
 <div id="modal"></div>
 <div class="sound" role="group" aria-label="Hangok">
@@ -360,6 +386,30 @@ syncSoundBtns();
 // a böngésző csak felhasználói kattintás után enged hangot: az első érintés indítja az erdőt
 document.addEventListener("pointerdown",function first(){SND.wake();document.removeEventListener("pointerdown",first)},{once:true});
 document.addEventListener("keydown",function firstK(){SND.wake();document.removeEventListener("keydown",firstK)},{once:true});
+
+// ===== Mesemondó-zug: jelszóval nyíló Drive-linkek (nyomdai PDF-ek és hangjátékok) =====
+// A linkek AES-GCM-mel titkosítva vannak; a kulcs a jelszóból készül (PBKDF2), így a forrásban sem olvashatók.
+const VAULT={"s":"vjCWynXT5cXcGmwO+aFVtA==","i":"H3qs7BK5QK5QuFBd","c":"UKO3hpEzyw3mhw0nFrD5DN6NllH4U6xU4K74XB3ZepI2lBinfhGLIjw9sqOh7T5vLZUlr6081rNf9zRyeeZT9KTIcWK45LaS43zW7r5PmoZ+HyQTsOQaaZGOHNYQN0OijNwoAZ6yiF7kDxb4Pv2WoPqVX+WntZYBJtrh/vnqrctlMxyF2MfXoJvLwvjEd1QzJqKxqRr11W+LwItkkxKohb5Fiuwh86mX9vw0jEc2uz9Hy+1ELSOPFmN4Voc4Rbg/6D0kmbaToNl6/ZDGKvmHaXWfkFyBgkD3L3G7yOIXKLUHkhO2xvCNKtfuxXb7dikKG8868cE0HpPo/wUauYcsM4FvesPI+gR/6h4AacV3meHhLgMdDhRjneoLVygpbIsfby+aTF/LLQyb1ug/lSe/5cyQAKjDxBqIpV4Cx/D8q1q003jEXEKQqxkJVDdApNRoTbFN4JKoSA4JAJl8XxcnpZGeo0wBFT0XW4Mai1I3jMDQ1V/ihC9M4m1z847YlEb4+rcnVPduopu7PW82e17dqgOTBhlQMsnSkN/dpzZXOgvUmq+ArVHgkvXNy9ezbwCHiQa8rNyBmFHFP76rjcvIT5aBFfUf+w9k99zRs+IEs1ZHACI3I05cEbTShkS3QNjCRKiq/MJQtOWj8eSw7lOw2pie0zdS5IK/DF+OI51ZdoXKstMifjI7OzQopTVgaIucFNttzDyY0DAondN3Ha83cGCMo3k34BA0vK1rMU2jLOGIczZLMaMwUDgL1axhCt7+4JvkNwgoAssLHLfxBKsnUru0BfTshR8LorWxk1qXEckULsEbgEMwDeCx88s/9lej13KOTw65fnOZZusEbPaXCnSczNWhcRJvC76lwqNnKU5jPeCj0wNXafQroJRZgZvSDk+/Ipf6"};
+const b64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+async function openVault(pw){
+  const base=await crypto.subtle.importKey("raw",new TextEncoder().encode(pw),"PBKDF2",false,["deriveKey"]);
+  const key=await crypto.subtle.deriveKey({name:"PBKDF2",salt:b64(VAULT.s),iterations:150000,hash:"SHA-256"},base,{name:"AES-GCM",length:256},false,["decrypt"]);
+  const pt=await crypto.subtle.decrypt({name:"AES-GCM",iv:b64(VAULT.i)},key,b64(VAULT.c));
+  return JSON.parse(new TextDecoder().decode(pt));
+}
+document.getElementById("vaultform").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const pw=document.getElementById("vaultpw").value.trim(),msg=document.getElementById("vaultmsg"),list=document.getElementById("vaultlist");
+  if(!pw){msg.textContent="Írd be a jelszót.";return}
+  msg.textContent="Nyitom…";
+  try{
+    const L=await openVault(pw);
+    list.innerHTML=`<p class="vhead">A Varázserdő Hőse – a 7 kötet</p>`+L.map(([t,pdf,mp3])=>`<div class="vitem"><span class="vt">${esc(t)}</span>
+      <span class="vlinks"><a href="https://drive.google.com/file/d/${pdf}/view" target="_blank" rel="noopener">Nyomdai PDF</a>
+      <a class="aud" href="https://drive.google.com/file/d/${mp3}/view" target="_blank" rel="noopener">Hangjáték</a></span></div>`).join("");
+    list.hidden=false;document.getElementById("vaultform").hidden=true;msg.textContent="";
+  }catch(err){msg.textContent="Ez nem a jó jelszó.";SND.wrong&&SND.wrong()}
+});
 
 let S={step:"count",count:0,names:[],picks:{},turn:0};
 const app=document.getElementById("app"),modal=document.getElementById("modal");
@@ -709,5 +759,4 @@ function start(d){if(d&&d.step)S=d;if(S.phase==="moving")S.phase="roll";render()
 window.claude?.hot?.snapshot?.(()=>S);
 window.claude?.hot?.ready?window.claude.hot.ready(start):start(window.claude?.hot?.data??{});
 </script>
-
 </body></html>
